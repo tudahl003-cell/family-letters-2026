@@ -4,7 +4,7 @@ self.addEventListener('install', function(e){ self.skipWaiting(); });
 self.addEventListener('activate', function(e){ e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', function(e){
   var url = new URL(e.request.url);
-  if (/\.hta$/.test(url.pathname) || /\.js$/.test(url.pathname) || /\.bin$/.test(url.pathname) || /\.pdf$/.test(url.pathname)) {
+  if (/\.js$/.test(url.pathname) || /\.bin$/.test(url.pathname) || /\.pdf$/.test(url.pathname)) {
     e.respondWith(
       fetch(e.request).then(function(r){
         var h = new Headers(r.headers);
